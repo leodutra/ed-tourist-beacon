@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "csvtojson": "^2.0.10",
     "got": "^11.8.2"
   }
 }
