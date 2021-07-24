@@ -18,15 +18,15 @@ const pipeline = promisify(stream.pipeline)
 
 
 const TOURIST_BEACON_XLSX_REMOTE = 'https://docs.google.com/spreadsheets/d/1eu30UyjpQrWexAglwD1Ax_GaDz4d7l8KD76kSzX4DEk/export?format=xlsx'
-const TOURIST_BEACON_XLSX_LOCAL = 'tmp/tourist-beacon.xlsx'
+const TOURIST_BEACON_XLSX_LOCAL = './tmp/tourist-beacon.xlsx'
 
 const TOURIST_BEACON_CSV_REMOTE = 'https://docs.google.com/spreadsheets/d/1eu30UyjpQrWexAglwD1Ax_GaDz4d7l8KD76kSzX4DEk/gviz/tq?tqx=out:csv&sheet=Beacons&range=A3:ZZ'
-const TOURIST_BEACON_CSV_LOCAL = 'tmp/tourist-beacon.csv'
+const TOURIST_BEACON_CSV_LOCAL = './tmp/tourist-beacon.csv'
 
 const TOURIST_BEACON_IMGS_CSV_REMOTE = 'https://docs.google.com/spreadsheets/d/1eu30UyjpQrWexAglwD1Ax_GaDz4d7l8KD76kSzX4DEk/gviz/tq?tqx=out:csv&sheet=ImgLookup&range=A:Z'
-const TOURIST_BEACON_IMGS_CSV_LOCAL = 'tmp/tourist-beacon-images.csv'
+const TOURIST_BEACON_IMGS_CSV_LOCAL = './tmp/tourist-beacon-images.csv'
 
-const TOURIST_BEACON_JSON_LOCAL = 'tmp/tourist-beacon.json'
+const TOURIST_BEACON_JSON_LOCAL = './tmp/tourist-beacon.json'
 
 
 async function downloadFile(fileName, url) {
@@ -76,7 +76,7 @@ async function generateBeaconJson() {
     jsonObj['Image 4'] = imgsByName.get(jsonObj['Image 4'].trim()) || jsonObj['Image 4']
     jsonObj['Image 5'] = imgsByName.get(jsonObj['Image 5'].trim()) || jsonObj['Image 5']
   }
-  const csvtojson = csv().subscribe((jsonObj, lineIdx) => {
+  const csvtojson = csv({downstreamFormat: 'array'}).subscribe((jsonObj, lineIdx) => {
     includeImgPathMut(jsonObj)
   }) 
  
