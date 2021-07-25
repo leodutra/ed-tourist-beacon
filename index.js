@@ -73,6 +73,7 @@ async function generateBeaconJson() {
   const writeStream = createWriteStream(TOURIST_BEACON_JSON_LOCAL);
   const imgs = await loadBeaconImgs();
   const imgsByName = new Map(imgs.map((x) => [upper(x.name), x]));
+  const now = new Date(Date.now()).toISOString()
   const resolveImagesMut = (jsonObj) => {
     const images = [
       imgsByName.get(upper(jsonObj["Image"])) || jsonObj["Image"],
@@ -88,6 +89,7 @@ async function generateBeaconJson() {
     delete jsonObj["Image 5"];
 
     jsonObj.images = images;
+    jsonObj['Captured At'] = now
   };
 
   const converter = csv({
