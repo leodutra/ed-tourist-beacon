@@ -14,6 +14,8 @@ import stream from "stream";
 import { promisify } from "util";
 import csv from "csvtojson";
 
+const CSV_SEPARATOR = ",";
+
 const pipeline = promisify(stream.pipeline);
 
 const TOURIST_BEACON_XLSX_REMOTE =
@@ -73,24 +75,7 @@ async function generateBeaconJson() {
   const writeStream = createWriteStream(TOURIST_BEACON_JSON_LOCAL);
   const imgs = await loadBeaconImgs();
   const imgsByName = new Map(imgs.map((x) => [upper(x.name), x]));
-  const now = new Date(Date.now()).toISOString()
-  const resolveImagesMut = (jsonObj) => {
-    const images = [
-      imgsByName.get(upper(jsonObj["Image"])) || jsonObj["Image"],
-      imgsByName.get(upper(jsonObj["Image 2"])) || jsonObj["Image 2"],
-      imgsByName.get(upper(jsonObj["Image 3"])) || jsonObj["Image 3"],
-      imgsByName.get(upper(jsonObj["Image 4"])) || jsonObj["Image 4"],
-      imgsByName.get(upper(jsonObj["Image 5"])) || jsonObj["Image 5"],
-    ];
-    delete jsonObj["Image"];
-    delete jsonObj["Image 2"];
-    delete jsonObj["Image 3"];
-    delete jsonObj["Image 4"];
-    delete jsonObj["Image 5"];
-
-    jsonObj.images = images;
-    jsonObj['Captured At'] = now
-  };
+  const now = new Date(Date.now()).toISOString();
 
   const converter = csv({
     downstreamFormat: "array",
@@ -111,12 +96,35 @@ async function generateBeaconJson() {
       "Compl",
       "Text",
     ],
-    ignoreColumns: /Compl/
+    ignoreColumns: /Compl/,
   });
 
-  const csvtojson = converter.subscribe((jsonObj, lineIdx) => {
-    resolveImagesMut(jsonObj);
-  });
+  const removeEmptyLines = (line) => {
+    const [, number, siteName] = line.split(CSV_SEPARATOR);
+    return number !== '""' || siteName !== '""' ? line : "";
+  };
+
+  const resolveImagesMut = (jsonObj) => {
+    const images = [
+      imgsByName.get(upper(jsonObj["Image"])),
+      imgsByName.get(upper(jsonObj["Image 2"])),
+      imgsByName.get(upper(jsonObj["Image 3"])),
+      imgsByName.get(upper(jsonObj["Image 4"])),
+      imgsByName.get(upper(jsonObj["Image 5"])),
+    ].filter((x) => x);
+    delete jsonObj["Image"];
+    delete jsonObj["Image 2"];
+    delete jsonObj["Image 3"];
+    delete jsonObj["Image 4"];
+    delete jsonObj["Image 5"];
+
+    jsonObj.images = images;
+    jsonObj["Captured At"] = now;
+  };
+
+  const csvtojson = converter
+    .preFileLine((line, index) => removeEmptyLines(line))
+    .subscribe((jsonObj, index) => resolveImagesMut(jsonObj));
 
   await pipeline(readStream, csvtojson, writeStream); // CSV accepts GOT stream
 }
