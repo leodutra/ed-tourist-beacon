@@ -78,25 +78,25 @@ async function generateBeaconJson() {
   const now = new Date(Date.now()).toISOString();
 
   const converter = csv({
-    downstreamFormat: "array",
+    downstreamFormat: "line", // "array"
     headers: [
-      "UUID",
-      "No.",
-      "Site Name",
-      "System",
-      "Distance",
-      "Type",
-      "Series",
-      "Set",
-      "Image",
-      "Image 2",
-      "Image 3",
-      "Image 4",
-      "Image 5",
-      "Compl",
-      "Text",
+      "uuid",
+      "number",
+      "siteName",
+      "system",
+      "distance",
+      "type",
+      "series",
+      "set",
+      "image",
+      "image2",
+      "image3",
+      "image4",
+      "image5",
+      "compl",
+      "text",
     ],
-    ignoreColumns: /Compl/,
+    ignoreColumns: /compl/,
   });
 
   const removeEmptyLines = (line) => {
@@ -106,20 +106,20 @@ async function generateBeaconJson() {
 
   const resolveImagesMut = (jsonObj) => {
     const images = [
-      imgsByName.get(upper(jsonObj["Image"])),
-      imgsByName.get(upper(jsonObj["Image 2"])),
-      imgsByName.get(upper(jsonObj["Image 3"])),
-      imgsByName.get(upper(jsonObj["Image 4"])),
-      imgsByName.get(upper(jsonObj["Image 5"])),
+      imgsByName.get(upper(jsonObj["image"])),
+      imgsByName.get(upper(jsonObj["image2"])),
+      imgsByName.get(upper(jsonObj["image3"])),
+      imgsByName.get(upper(jsonObj["image4"])),
+      imgsByName.get(upper(jsonObj["image5"])),
     ].filter((x) => x);
-    delete jsonObj["Image"];
-    delete jsonObj["Image 2"];
-    delete jsonObj["Image 3"];
-    delete jsonObj["Image 4"];
-    delete jsonObj["Image 5"];
+    delete jsonObj["image"];
+    delete jsonObj["image2"];
+    delete jsonObj["image3"];
+    delete jsonObj["image4"];
+    delete jsonObj["image5"];
 
     jsonObj.images = images;
-    jsonObj["Captured At"] = now;
+    jsonObj.capturedAt = now;
   };
 
   const csvtojson = converter
